@@ -1,94 +1,192 @@
-function extractFeatures(text) {
-    const input = text.toLowerCase().trim();
-  
-    const urgencyKeywords = ["urgent", "immediately", "now", "verify now", "act fast", "suspended"];
-    const bankingKeywords = ["bank", "kyc", "otp", "upi", "account", "payment", "refund", "transaction"];
-    const rewardKeywords = ["prize", "reward", "winner", "gift", "free", "bonus"];
-    const impersonationKeywords = ["support", "official", "customer care", "verification", "secure login"];
-    const dangerKeywords = ["click here", "login now", "download now", "install update", "confirm now"];
-  
-    const suspiciousDomains = ["bit.ly", "tinyurl", "rb.gy", "shorturl", "free-login", "verify-account"];
-    const suspiciousExtensions = [".exe", ".apk", ".zip", ".msi"];
-  
-    const countMatches = (keywords) =>
-      keywords.reduce((count, keyword) => count + (input.includes(keyword) ? 1 : 0), 0);
-  
-    const urgencyScore = Math.min(countMatches(urgencyKeywords) / 3, 1);
-    const bankingScore = Math.min(countMatches(bankingKeywords) / 4, 1);
-    const rewardScore = Math.min(countMatches(rewardKeywords) / 3, 1);
-    const impersonationScore = Math.min(countMatches(impersonationKeywords) / 3, 1);
-    const actionScore = Math.min(countMatches(dangerKeywords) / 3, 1);
-  
-    const urlRisk =
-      suspiciousDomains.some(domain => input.includes(domain)) ||
-      suspiciousExtensions.some(ext => input.includes(ext)) ||
-      /https?:\/\/[^\s]+/.test(input) && input.includes("-")
-        ? 1
-        : 0;
-  
-    const numberHeavyScore = (input.match(/\d/g) || []).length > 6 ? 0.6 : 0;
-    const symbolHeavyScore = /[@#$%^&*]{2,}/.test(input) ? 0.5 : 0;
-  
+(function () {
+  const SHORTENER_DOMAINS = [
+    "bit.ly",
+    "tinyurl.com",
+    "t.co",
+    "rb.gy",
+    "goo.gl",
+    "is.gd",
+    "ow.ly",
+    "buff.ly"
+  ];
+
+  const SUSPICIOUS_DOMAIN_WORDS = [
+    "verify",
+    "secure",
+    "login",
+    "account",
+    "update",
+    "reward",
+    "gift",
+    "bank",
+    "kyc",
+    "wallet"
+  ];
+
+  const PHISHING_KEYWORDS = [
+    "verify now",
+    "account suspended",
+    "kyc pending",
+    "urgent",
+    "immediately",
+    "claim reward",
+    "winner",
+    "free gift",
+    "secure login",
+    "download update",
+    "otp",
+    "upi",
+    "bank account",
+    "refund now",
+    "confirm now"
+  ];
+
+  const SUSPICIOUS_BUTTON_WORDS = [
+    "verify now",
+    "secure login",
+    "claim reward",
+    "download now",
+    "install update",
+    "confirm account"
+  ];
+
+  const RISKY_EXTENSIONS = [".exe", ".apk", ".zip", ".msi", ".bat", ".scr"];
+
+  function safeText(str) {
+    return (str || "").toString().trim().toLowerCase();
+  }
+
+  function countMatches(text, keywords) {
+    const t = safeText(text);
+    return keywords.reduce((count, keyword) => count + (t.includes(keyword) ? 1 : 0), 0);
+  }
+
+  function getDomain(url) {
+    try {
+      return new URL(url).hostname.toLowerCase();
+    } catch {
+      return "";
+    }
+  }
+
+  function isShortener(url) {
+    const domain = getDomain(url);
+    return SHORTENER_DOMAINS.some(d => domain === d || domain.endsWith("." + d));
+  }
+
+  function hasRiskyExtension(url) {
+    const lower = safeText(url);
+    return RISKY_EXTENSIONS.some(ext => lower.includes(ext));
+  }
+
+  function countHyphensInDomain(url) {
+    const domain = getDomain(url);
+    return (domain.match(/-/g) || []).length;
+  }
+
+  function suspiciousDomainWordScore(url) {
+    const domain = getDomain(url);
+    const count = SUSPICIOUS_DOMAIN_WORDS.reduce((acc, word) => acc + (domain.includes(word) ? 1 : 0), 0);
+    return Math.min(count / 3, 1);
+  }
+
+  function deceptiveAnchorScore(anchorText, url) {
+    const text = safeText(anchorText);
+    const domain = getDomain(url);
+
+    if (!text || !domain) return 0;
+
+    const looksLikeDomain = /\b[a-z0-9-]+\.[a-z]{2,}\b/.test(text);
+    if (!looksLikeDomain) return 0;
+
+    return text.includes(domain) ? 0 : 1;
+  }
+
+  function extractThreatFeatures({ url = "", text = "", anchorText = "", buttonText = "" }) {
+    const combinedText = [text, anchorText, buttonText].join(" ").toLowerCase();
+
+    const shortenerScore = isShortener(url) ? 1 : 0;
+    const riskyExtScore = hasRiskyExtension(url) ? 1 : 0;
+    const hyphenScore = Math.min(countHyphensInDomain(url) / 3, 1);
+    const suspiciousDomainScore = suspiciousDomainWordScore(url);
+
+    const phishingKeywordScore = Math.min(countMatches(combinedText, PHISHING_KEYWORDS) / 4, 1);
+    const suspiciousButtonScore = Math.min(countMatches(combinedText, SUSPICIOUS_BUTTON_WORDS) / 2, 1);
+    const urgencyScore = Math.min(countMatches(combinedText, ["urgent", "immediately", "now", "act fast", "suspended"]) / 3, 1);
+    const deceptiveScore = deceptiveAnchorScore(anchorText, url);
+
     return [
+      shortenerScore,
+      riskyExtScore,
+      hyphenScore,
+      suspiciousDomainScore,
+      phishingKeywordScore,
+      suspiciousButtonScore,
       urgencyScore,
-      bankingScore,
-      rewardScore,
-      impersonationScore,
-      actionScore,
-      urlRisk,
-      numberHeavyScore,
-      symbolHeavyScore
+      deceptiveScore
     ];
   }
-  
-  function runTensorThreatAnalysis(text) {
-    const features = extractFeatures(text);
-  
-    const featureTensor = tf.tensor2d([features]);
-    const weightTensor = tf.tensor2d([[0.18], [0.20], [0.10], [0.14], [0.14], [0.16], [0.04], [0.04]]);
-  
-    const rawScoreTensor = featureTensor.matMul(weightTensor);
-    const rawScore = rawScoreTensor.dataSync()[0];
-  
-    featureTensor.dispose();
-    weightTensor.dispose();
-    rawScoreTensor.dispose();
-  
-    const score = Math.min(Math.round(rawScore * 100), 100);
-  
-    let threatLevel = "Safe";
-    if (score >= 60) threatLevel = "High Risk";
-    else if (score >= 30) threatLevel = "Suspicious";
-  
-    let scamType = "General Suspicious Activity";
-    const input = text.toLowerCase();
-  
-    if (input.includes("otp") || input.includes("upi") || input.includes("transaction")) {
-      scamType = "OTP / Payment Scam";
-    } else if (input.includes("bank") || input.includes("kyc") || input.includes("account")) {
-      scamType = "Banking / Phishing Scam";
-    } else if (input.includes("prize") || input.includes("reward") || input.includes("winner")) {
-      scamType = "Reward / Prize Scam";
-    } else if (input.includes("download now") || input.includes(".exe") || input.includes(".apk")) {
-      scamType = "Suspicious Download Risk";
+
+  function localThreatScore(features) {
+    const weights = [0.16, 0.18, 0.10, 0.12, 0.18, 0.10, 0.08, 0.08];
+    let total = 0;
+
+    for (let i = 0; i < features.length; i++) {
+      total += features[i] * weights[i];
     }
-  
+
+    return Math.min(Math.round(total * 100), 100);
+  }
+
+  function classifyThreat(score) {
+    if (score >= 65) return "High Risk";
+    if (score >= 35) return "Suspicious";
+    return "Safe";
+  }
+
+  function buildReasons(features) {
     const reasons = [];
-    const [urgency, banking, reward, impersonation, action, urlRisk] = features;
-  
-    if (urgency > 0) reasons.push("Uses urgency or pressure language");
-    if (banking > 0) reasons.push("Contains financial / banking-related terms");
-    if (reward > 0) reasons.push("Uses reward or bait-style language");
-    if (impersonation > 0) reasons.push("Looks like impersonation or fake support language");
-    if (action > 0) reasons.push("Pushes immediate action such as clicking or downloading");
-    if (urlRisk > 0) reasons.push("Contains a suspicious or risky URL pattern");
-  
-    if (reasons.length === 0) reasons.push("No strong scam indicators detected");
-  
+    const [
+      shortenerScore,
+      riskyExtScore,
+      hyphenScore,
+      suspiciousDomainScore,
+      phishingKeywordScore,
+      suspiciousButtonScore,
+      urgencyScore,
+      deceptiveScore
+    ] = features;
+
+    if (shortenerScore) reasons.push("Shortened or masked URL detected");
+    if (riskyExtScore) reasons.push("Risky downloadable file type detected");
+    if (hyphenScore > 0.5) reasons.push("Suspicious domain structure with excessive hyphens");
+    if (suspiciousDomainScore > 0.3) reasons.push("Domain contains phishing-like trust words");
+    if (phishingKeywordScore > 0.2) reasons.push("Page or link contains phishing-related keywords");
+    if (suspiciousButtonScore > 0.2) reasons.push("Suspicious call-to-action button language detected");
+    if (urgencyScore > 0.2) reasons.push("Urgency / pressure language detected");
+    if (deceptiveScore > 0.5) reasons.push("Displayed link text does not match actual destination");
+
+    if (reasons.length === 0) reasons.push("No strong threat indicators detected");
+    return reasons;
+  }
+
+  function analyzeThreat(input) {
+    const features = extractThreatFeatures(input);
+    const score = localThreatScore(features);
+    const threatLevel = classifyThreat(score);
+    const reasons = buildReasons(features);
+
     return {
       score,
       threatLevel,
-      scamType,
-      reasons
+      reasons,
+      features
     };
   }
+
+  window.SisterShieldAI = {
+    analyzeThreat,
+    hasRiskyExtension,
+    getDomain
+  };
+})();

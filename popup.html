@@ -14,19 +14,12 @@
     </div>
 
     <div class="card">
-      <h2>Analyze Current Page</h2>
-      <p class="small-text">Check whether the website you are currently visiting looks suspicious.</p>
-      <button id="analyzePageBtn" class="primary-btn">Analyze Current Page</button>
-    </div>
-
-    <div class="card">
-      <h2>Smart Scam Analyzer</h2>
-      <p class="small-text">Paste a suspicious link, message, or email below.</p>
-      <textarea
-        id="inputText"
-        placeholder="Example: Your bank KYC is pending. Click here to verify now..."
-      ></textarea>
-      <button id="analyzeTextBtn" class="primary-btn">Run Scam Analysis</button>
+      <h2>Protection Status</h2>
+      <p class="small-text">AI-assisted browser protection is active. Use support tools below if needed.</p>
+      <div id="resultBox" class="result-box">
+        <p><strong>Status:</strong> Protection Active</p>
+        <p><strong>Mode:</strong> Automatic AI Protection</p>
+      </div>
     </div>
 
     <div class="card">
@@ -34,13 +27,6 @@
       <div class="button-group">
         <button id="identityShieldBtn" class="secondary-btn">Identity Shield</button>
         <button id="panicModeBtn" class="secondary-btn">Emergency Panic Mode</button>
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>Results</h2>
-      <div id="resultBox" class="result-box">
-        <p>No analysis yet. Start by analyzing a page or pasting suspicious content.</p>
       </div>
     </div>
 
@@ -69,8 +55,6 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
-  <script src="utils.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

@@ -1,3 +1,3 @@
 chrome.runtime.onInstalled.addListener(() => {
-    console.log("Sister Shield installed successfully.");
-  });
+  console.log("Sister Shield installed and ready.");
+});
