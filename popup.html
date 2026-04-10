@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sister Shield</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Sister Shield</h1>
+      <p>Detect. Intercept. Protect.</p>
+    </div>
+
+    <div class="card">
+      <h2>Analyze Current Page</h2>
+      <p class="small-text">Check whether the website you are currently visiting looks suspicious.</p>
+      <button id="analyzePageBtn" class="primary-btn">Analyze Current Page</button>
+    </div>
+
+    <div class="card">
+      <h2>Smart Scam Analyzer</h2>
+      <p class="small-text">Paste a suspicious link, message, or email below.</p>
+      <textarea
+        id="inputText"
+        placeholder="Example: Your bank KYC is pending. Click here to verify now..."
+      ></textarea>
+      <button id="analyzeTextBtn" class="primary-btn">Run Scam Analysis</button>
+    </div>
+
+    <div class="card">
+      <h2>Quick Safety Tools</h2>
+      <div class="button-group">
+        <button id="identityShieldBtn" class="secondary-btn">Identity Shield</button>
+        <button id="panicModeBtn" class="secondary-btn">Emergency Panic Mode</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Results</h2>
+      <div id="resultBox" class="result-box">
+        <p>No analysis yet. Start by analyzing a page or pasting suspicious content.</p>
+      </div>
+    </div>
+
+    <div id="identitySection" class="card hidden">
+      <h2>Identity Shield</h2>
+      <p class="small-text">Choose the issue you are facing:</p>
+      <div class="button-group vertical">
+        <button class="issue-btn" data-issue="fakeProfile">Fake Profile Created</button>
+        <button class="issue-btn" data-issue="photoMisuse">My Photos Are Being Misused</button>
+        <button class="issue-btn" data-issue="impersonation">Impersonation / Duplicate Account</button>
+        <button class="issue-btn" data-issue="imageHarassment">Image-Based Harassment / Blackmail</button>
+      </div>
+      <div id="identityOutput" class="guide-box"></div>
+    </div>
+
+    <div id="panicSection" class="card hidden">
+      <h2>Emergency Panic Mode</h2>
+      <p class="small-text">Choose the emergency situation:</p>
+      <div class="button-group vertical">
+        <button class="panic-btn" data-panic="cyberbullying">Cyberbullying / Harassment</button>
+        <button class="panic-btn" data-panic="otpScam">OTP / Money Scam</button>
+        <button class="panic-btn" data-panic="accountHacked">Account Hacked</button>
+        <button class="panic-btn" data-panic="blackmail">Blackmail / Threats</button>
+      </div>
+      <div id="panicOutput" class="guide-box"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
+  <script src="utils.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
