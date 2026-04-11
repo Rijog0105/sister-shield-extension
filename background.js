@@ -1,11 +1,16 @@
 chrome.runtime.onInstalled.addListener(() => {
-  console.log("Sister Shield background service worker active");
+  console.log("SHELTER background service worker active");
 });
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "panicMode") {
     handlePanicMode(sendResponse);
-    return true; // keeps sendResponse alive for async
+    return true;
+  }
+
+  if (message.action === "emergencyMode") {
+    handleEmergencyMode(sendResponse);
+    return true;
   }
 });
 
@@ -17,11 +22,12 @@ function handlePanicMode(sendResponse) {
     }
 
     const activeTab = tabs[0];
+
     const threatLog = {
       url: activeTab.url || "Unknown URL",
       title: activeTab.title || "Unknown Page",
       time: new Date().toLocaleString(),
-      riskScore: "Emergency Exit",
+      riskScore: 100,
       threatType: detectThreatType(activeTab),
       mode: "panic_mode_triggered"
     };
@@ -31,10 +37,8 @@ function handlePanicMode(sendResponse) {
       const blockedSites = data.blockedSites || [];
       const threatsBlocked = data.threatsBlocked || 0;
 
-      // Save panic log
       panicLogs.unshift(threatLog);
 
-      // Also store in blockedSites for dashboard consistency
       blockedSites.unshift({
         url: threatLog.url,
         score: 100,
@@ -52,7 +56,6 @@ function handlePanicMode(sendResponse) {
           lastPanicEvent: threatLog
         },
         () => {
-          // Close active suspicious tab immediately
           chrome.tabs.remove(activeTab.id, () => {
             if (chrome.runtime.lastError) {
               sendResponse({
@@ -64,9 +67,50 @@ function handlePanicMode(sendResponse) {
 
             sendResponse({
               success: true,
-              message: "Panic Mode activated. Threat stored locally and tab closed."
+              message: "Panic Mode activated"
             });
           });
+        }
+      );
+    });
+  });
+}
+
+function handleEmergencyMode(sendResponse) {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    const activeTab = tabs && tabs.length ? tabs[0] : null;
+
+    const emergencyLog = {
+      time: new Date().toLocaleString(),
+      url: activeTab?.url || "Unknown URL",
+      title: activeTab?.title || "Unknown Page",
+      action: "Opened National Cyber Crime Reporting Portal",
+      type: "emergency_mode_triggered"
+    };
+
+    chrome.storage.local.get(["emergencyLogs"], (data) => {
+      const emergencyLogs = data.emergencyLogs || [];
+
+      emergencyLogs.unshift(emergencyLog);
+
+      chrome.storage.local.set(
+        {
+          emergencyLogs: emergencyLogs.slice(0, 10),
+          lastEmergencyEvent: emergencyLog,
+          protectionStatus: "EMERGENCY MODE ACTIVATED"
+        },
+        () => {
+          chrome.tabs.create(
+            {
+              url: "https://cybercrime.gov.in/"
+            },
+            () => {
+              sendResponse({
+                success: true,
+                message: "Emergency Mode activated"
+              });
+            }
+          );
         }
       );
     });
