@@ -3,67 +3,179 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bank KYC Verification</title>
+  <title>SecureNet Bank - Verify Account</title>
   <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #fff7ed, #fee2e2);
-      color: #111827;
-      max-width: 900px;
-      margin: 40px auto;
-      padding: 20px;
-      line-height: 1.6;
+      background: linear-gradient(180deg, #f8fafc, #eef2f7);
+      min-height: 100vh;
+      color: #0f172a;
     }
-    .card {
-      background: #ffffff;
-      border: 1px solid #fecaca;
-      border-radius: 18px;
-      padding: 28px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-    }
-    .warning {
-      color: #991b1b;
-      font-weight: 800;
-      font-size: 24px;
-      margin-bottom: 10px;
-    }
-    .btn-link {
-      display: inline-block;
-      margin-top: 16px;
-      background: #dc2626;
+    .topbar {
+      background: #0b1f4d;
       color: white;
-      text-decoration: none;
-      padding: 12px 18px;
-      border-radius: 12px;
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       font-weight: 700;
     }
-    .small {
-      margin-top: 20px;
+    .logo {
+      font-size: 22px;
+      letter-spacing: 0.5px;
+    }
+    .hero {
+      max-width: 1100px;
+      margin: 60px auto;
+      padding: 0 24px;
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 30px;
+      align-items: center;
+    }
+    .left-card {
+      background: white;
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+      border: 1px solid #e2e8f0;
+    }
+    .badge {
+      display: inline-block;
+      background: #dbeafe;
+      color: #1d4ed8;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+    h1 {
+      font-size: 38px;
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+    .sub {
+      font-size: 16px;
+      line-height: 1.7;
+      color: #475569;
+      margin-bottom: 28px;
+    }
+    .warning {
+      background: #fff7ed;
+      border: 1px solid #fdba74;
+      color: #9a3412;
+      border-radius: 18px;
+      padding: 16px;
+      margin-bottom: 22px;
       font-size: 14px;
-      color: #7f1d1d;
+      font-weight: 600;
+    }
+    .verify-btn {
+      display: inline-block;
+      background: linear-gradient(90deg, #dc2626, #ef4444);
+      color: white;
+      border: none;
+      border-radius: 16px;
+      padding: 16px 28px;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 10px 24px rgba(239, 68, 68, 0.22);
+    }
+    .right-card {
+      background: linear-gradient(180deg, #0f172a, #1e293b);
+      color: white;
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
+    }
+    .right-card h3 {
+      margin-bottom: 18px;
+      font-size: 20px;
+    }
+    .info {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+    .info-title {
+      font-size: 13px;
+      color: #cbd5e1;
+      margin-bottom: 6px;
+    }
+    .info-value {
+      font-size: 15px;
+      font-weight: 700;
+    }
+    .footer-note {
+      margin-top: 18px;
+      font-size: 12px;
+      color: #94a3b8;
+      line-height: 1.6;
+    }
+    @media (max-width: 900px) {
+      .hero {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
-<body>
-  <div class="card">
-    <div class="warning">⚠ Urgent: Your Bank Account Will Be Suspended</div>
+<body data-demo-type="phishing">
+  <div class="topbar">
+    <div class="logo">SecureNet Bank</div>
+    <div>Customer Protection Portal</div>
+  </div>
 
-    <p>
-      Dear customer, your KYC is pending and your UPI services will be blocked immediately
-      unless you verify now.
-    </p>
+  <div class="hero">
+    <div class="left-card">
+      <div class="badge">Priority Verification Notice</div>
+      <h1>Your account requires immediate verification</h1>
+      <p class="sub">
+        Due to unusual login activity, your banking access has been temporarily limited.
+        To avoid service suspension, please verify your account ownership immediately.
+      </p>
 
-    <p>
-      To avoid account suspension, complete secure login verification now.
-    </p>
+      <div class="warning">
+        ⚠ Failure to verify within 30 minutes may result in temporary account suspension.
+      </div>
 
-    <a class="btn-link" href="https://example.com/verify-now-kyc-update">
-      Verify Now
-    </a>
+      <button
+        class="verify-btn"
+        type="button"
+        data-risk-url="https://secure-bank-verify-user-account-login-check.com"
+        data-risk-id="bank-risk-1"
+      >
+        Verify Now
+      </button>
+    </div>
 
-    <p class="small">
-      Controlled phishing simulation for Sister Shield demo.
-    </p>
+    <div class="right-card">
+      <h3>Recent Account Activity</h3>
+
+      <div class="info">
+        <div class="info-title">Login Location</div>
+        <div class="info-value">Unknown Device • Singapore</div>
+      </div>
+
+      <div class="info">
+        <div class="info-title">Flagged Action</div>
+        <div class="info-value">Credential Re-validation Required</div>
+      </div>
+
+      <div class="info">
+        <div class="info-title">Security Status</div>
+        <div class="info-value">Pending Verification</div>
+      </div>
+
+      <div class="footer-note">
+        This page is part of a phishing awareness demo for Sister Shield.  
+        The extension should intercept the “Verify Now” action before navigation.
+      </div>
+    </div>
   </div>
 </body>
 </html>

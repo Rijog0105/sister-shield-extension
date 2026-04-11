@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inbox (1) - Gmail</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f6f8fc;
+      color: #202124;
+      min-height: 100vh;
+    }
+    .topbar {
+      height: 64px;
+      background: #ffffff;
+      border-bottom: 1px solid #e0e0e0;
+      display: flex;
+      align-items: center;
+      padding: 0 18px;
+      gap: 18px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .gmail-logo {
+      font-size: 22px;
+      font-weight: 700;
+      color: #5f6368;
+    }
+    .search {
+      flex: 1;
+      max-width: 720px;
+      background: #eaf1fb;
+      border-radius: 24px;
+      padding: 12px 18px;
+      color: #5f6368;
+      font-size: 14px;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: calc(100vh - 64px);
+    }
+    .sidebar {
+      background: #f6f8fc;
+      border-right: 1px solid #eceff3;
+      padding: 20px 12px;
+    }
+    .compose {
+      background: #c2e7ff;
+      border: none;
+      border-radius: 16px;
+      padding: 14px 22px;
+      font-weight: 700;
+      margin-bottom: 24px;
+      cursor: default;
+    }
+    .nav-item {
+      padding: 12px 14px;
+      border-radius: 0 20px 20px 0;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+    .nav-item.active {
+      background: #d3e3fd;
+      font-weight: 700;
+    }
+    .main {
+      padding: 18px 24px;
+    }
+    .mail-card {
+      background: #ffffff;
+      border: 1px solid #dadce0;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+    }
+    .mail-header {
+      padding: 22px 24px;
+      border-bottom: 1px solid #eceff3;
+    }
+    .subject {
+      font-size: 24px;
+      font-weight: 500;
+      margin-bottom: 14px;
+    }
+    .from {
+      font-size: 14px;
+      color: #5f6368;
+    }
+    .mail-body {
+      padding: 28px 24px;
+      line-height: 1.8;
+      font-size: 15px;
+    }
+    .danger-box {
+      margin: 22px 0;
+      background: #fff7ed;
+      border: 1px solid #fdba74;
+      border-radius: 16px;
+      padding: 16px;
+      color: #9a3412;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .mail-link {
+      color: #1a73e8;
+      text-decoration: underline;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .cta-btn {
+      margin-top: 18px;
+      display: inline-block;
+      background: #1a73e8;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 20px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body data-demo-type="gmail">
+  <div class="topbar">
+    <div class="gmail-logo">Gmail</div>
+    <div class="search">Search mail</div>
+  </div>
+
+  <div class="layout">
+    <div class="sidebar">
+      <button class="compose">Compose</button>
+      <div class="nav-item active">Inbox</div>
+      <div class="nav-item">Starred</div>
+      <div class="nav-item">Snoozed</div>
+      <div class="nav-item">Sent</div>
+      <div class="nav-item">Drafts</div>
+    </div>
+
+    <div class="main">
+      <div class="mail-card">
+        <div class="mail-header">
+          <div class="subject">Action required: Internship verification pending</div>
+          <div class="from">placements@career-portal-alerts.com • to me</div>
+        </div>
+
+        <div class="mail-body">
+          <p>Hello Student,</p>
+
+          <p>
+            Your internship profile is incomplete and requires urgent verification to avoid losing your placement slot.
+          </p>
+
+          <div class="danger-box">
+            ⚠ This email is part of a phishing awareness demo for Sister Shield.
+          </div>
+
+          <p>
+            Please click the following link to confirm your eligibility:
+          </p>
+
+          <p>
+            <a
+              href="#"
+              class="mail-link"
+              data-risk-url="https://career-portal-student-verification-login.com"
+              data-risk-id="gmail-risk-1"
+            >
+              Verify Internship Eligibility
+            </a>
+          </p>
+
+          <button
+            class="cta-btn"
+            type="button"
+            data-risk-url="https://career-portal-student-verification-login.com"
+            data-risk-id="gmail-risk-1"
+          >
+            Verify Now
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

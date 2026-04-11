@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Instagram Support - Report Review</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(180deg, #fafafa, #f3f4f6);
+      color: #262626;
+    }
+
+    .topbar {
+      height: 64px;
+      background: #ffffff;
+      border-bottom: 1px solid #dbdbdb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .topbar-inner {
+      width: 100%;
+      max-width: 1100px;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      font-size: 26px;
+      font-weight: 700;
+      background: linear-gradient(90deg, #f58529, #dd2a7b, #8134af, #515bd4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 10px;
+      color: #8e8e8e;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .wrapper {
+      max-width: 1100px;
+      margin: 36px auto;
+      padding: 0 20px;
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 26px;
+    }
+
+    .main-card, .side-card {
+      background: #ffffff;
+      border: 1px solid #dbdbdb;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #fd1d1d, #e1306c, #c13584, #833ab4, #5851db);
+      color: white;
+      padding: 28px;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.18);
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    .hero h1 {
+      font-size: 32px;
+      line-height: 1.2;
+      margin-bottom: 10px;
+    }
+
+    .hero p {
+      font-size: 15px;
+      line-height: 1.7;
+      color: rgba(255,255,255,0.92);
+    }
+
+    .content {
+      padding: 24px;
+    }
+
+    .alert-box {
+      background: #fff1f2;
+      border: 1px solid #fda4af;
+      color: #9f1239;
+      border-radius: 18px;
+      padding: 16px;
+      margin-bottom: 18px;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.6;
+    }
+
+    .reason-box {
+      background: #faf5ff;
+      border: 1px solid #d8b4fe;
+      color: #6b21a8;
+      border-radius: 18px;
+      padding: 18px;
+      margin-bottom: 22px;
+    }
+
+    .reason-title {
+      font-size: 14px;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+
+    .reason-list {
+      padding-left: 18px;
+      font-size: 14px;
+      line-height: 1.9;
+    }
+
+    .image-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .fake-image {
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid #e5e7eb;
+      background: #f9fafb;
+      position: relative;
+    }
+
+    .fake-photo {
+      width: 100%;
+      height: 220px;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,0.18), transparent 20%),
+        linear-gradient(135deg, #111827, #1f2937);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      text-align: center;
+      padding: 18px;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .caption {
+      padding: 12px 14px;
+      font-size: 13px;
+      color: #374151;
+      line-height: 1.6;
+    }
+
+    .action-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 16px;
+      padding: 14px 14px;
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-danger {
+      background: linear-gradient(90deg, #dc2626, #ef4444);
+      color: white;
+    }
+
+    .btn-purple {
+      background: linear-gradient(90deg, #7c3aed, #9333ea);
+      color: white;
+    }
+
+    .btn-outline {
+      background: white;
+      color: #111827;
+      border: 1px solid #d1d5db;
+    }
+
+    .side-card {
+      padding: 24px;
+      height: fit-content;
+    }
+
+    .side-title {
+      font-size: 20px;
+      font-weight: 800;
+      margin-bottom: 18px;
+    }
+
+    .mini-card {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    .mini-label {
+      font-size: 12px;
+      color: #6b7280;
+      margin-bottom: 6px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .mini-value {
+      font-size: 14px;
+      font-weight: 800;
+      color: #111827;
+      line-height: 1.6;
+    }
+
+    .danger-note {
+      margin-top: 16px;
+      background: #fff7ed;
+      border: 1px solid #fdba74;
+      color: #9a3412;
+      border-radius: 16px;
+      padding: 14px;
+      font-size: 13px;
+      line-height: 1.7;
+      font-weight: 700;
+    }
+
+    @media (max-width: 900px) {
+      .wrapper {
+        grid-template-columns: 1fr;
+      }
+
+      .action-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .image-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero h1 {
+        font-size: 28px;
+      }
+    }
+  </style>
+</head>
+<body data-demo-type="social">
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="logo">Instagram</div>
+      <div class="nav-actions">
+        <span>Support Center</span>
+        <span>Account Review</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrapper">
+    <div class="main-card">
+      <div class="hero">
+        <div class="hero-badge">Urgent Safety Review</div>
+        <h1>Your images were reported for manipulation & misuse</h1>
+        <p>
+          Multiple reports were filed against your account for possible impersonation and altered media circulation.
+          Review the report immediately to avoid permanent account restriction.
+        </p>
+      </div>
+
+      <div class="content">
+        <div class="alert-box">
+          ⚠ Your account may be suspended within <strong>20 minutes</strong> if this review is not completed.
+        </div>
+
+        <div class="reason-box">
+          <div class="reason-title">Reported concerns:</div>
+          <ul class="reason-list">
+            <li>Possible fake account / impersonation complaint</li>
+            <li>Suspicious edited or morphed images detected</li>
+            <li>Unsafe download file attached as “evidence”</li>
+          </ul>
+        </div>
+
+        <div class="image-grid">
+          <div class="fake-image">
+            <div class="fake-photo" data-morph-risk="true">
+              Possible Morphed Image Detected<br />
+              (AI suspicious visual anomaly)
+            </div>
+            <div class="caption">
+              Reported media sample 1 — flagged for possible manipulation and face morphing.
+            </div>
+          </div>
+
+          <div class="fake-image">
+            <div class="fake-photo" data-morph-risk="true">
+              Duplicate / Edited Media Preview<br />
+              (Potential impersonation content)
+            </div>
+            <div class="caption">
+              Reported media sample 2 — flagged for identity misuse and suspicious edits.
+            </div>
+          </div>
+        </div>
+
+        <div class="action-grid">
+          <button
+            class="btn btn-danger"
+            type="button"
+            data-risk-url="https://instagram-support-photo-report-appeal-secure.com/recover"
+            data-risk-id="social-recover"
+            data-social-action="recover"
+          >
+            Recover Account
+          </button>
+
+          <button
+            class="btn btn-purple"
+            type="button"
+            data-risk-url="https://instagram-support-photo-report-appeal-secure.com/report"
+            data-risk-id="social-report"
+            data-social-action="review"
+          >
+            Review Report
+          </button>
+
+          <button
+            class="btn btn-outline"
+            type="button"
+            data-risk-url="https://instagram-support-photo-report-appeal-secure.com/download/evidence.zip"
+            data-risk-id="social-download"
+            data-social-action="download"
+          >
+            Download Evidence
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-card">
+      <div class="side-title">Case Details</div>
+
+      <div class="mini-card">
+        <div class="mini-label">Threat Category</div>
+        <div class="mini-value">Photo misuse / fake support / social engineering</div>
+      </div>
+
+      <div class="mini-card">
+        <div class="mini-label">Victim Pattern</div>
+        <div class="mini-value">Girls, students, creators, first-time users</div>
+      </div>
+
+      <div class="mini-card">
+        <div class="mini-label">Manipulation Used</div>
+        <div class="mini-value">Fear, shame, urgency, fake evidence, impersonation</div>
+      </div>
+
+      <div class="mini-card">
+        <div class="mini-label">Why It Matters</div>
+        <div class="mini-value">Matches the “Sister – Online World” problem statement directly</div>
+      </div>
+
+      <div class="danger-note">
+        🚨 This demo shows how fake support pages can exploit fear around
+        <strong>photo misuse, fake accounts, cyberbullying, and manipulated images.</strong>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,96 +1,152 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const identityShieldBtn = document.getElementById("identityShieldBtn");
-  const panicModeBtn = document.getElementById("panicModeBtn");
+  loadDashboard();
 
-  const identitySection = document.getElementById("identitySection");
-  const panicSection = document.getElementById("panicSection");
+  const panicBtn = document.getElementById("panicBtn");
+  const emergencyBtn = document.getElementById("emergencyBtn");
+  const resetBtn = document.getElementById("resetBtn");
 
-  const identityOutput = document.getElementById("identityOutput");
-  const panicOutput = document.getElementById("panicOutput");
+  if (panicBtn) {
+    panicBtn.addEventListener("click", () => {
+      panicBtn.disabled = true;
+      panicBtn.textContent = "⚠ Activating...";
 
-  const identityGuides = {
-    fakeProfile: `
-1. Take screenshots of the fake profile.
-2. Report the account on Instagram/Facebook immediately.
-3. Inform trusted friends not to interact with it.
-4. Secure your own account with strong password + 2FA.
-5. File a cybercrime complaint if impersonation continues.
-    `,
-    photoMisuse: `
-1. Save proof (screenshots, profile URL, posts).
-2. Report the content/platform immediately.
-3. Ask trusted contacts not to share the image further.
-4. Tighten privacy settings on social accounts.
-5. File a cybercrime complaint if the misuse is harmful or repeated.
-    `,
-    impersonation: `
-1. Collect screenshots and profile links.
-2. Report the fake account on the platform.
-3. Inform your close contacts about the impersonation.
-4. Update your account security and enable 2FA.
-5. Escalate through cybercrime reporting if needed.
-    `,
-    imageHarassment: `
-1. Do not respond emotionally or negotiate.
-2. Save all evidence (screenshots, usernames, messages).
-3. Block and report the offender immediately.
-4. Tell a trusted adult/friend/mentor.
-5. File a formal cybercrime complaint if threats continue.
-    `
-  };
+      chrome.runtime.sendMessage({ action: "panicMode" }, (response) => {
+        if (chrome.runtime.lastError) {
+          showToast("❌ Panic Mode failed");
+          panicBtn.disabled = false;
+          panicBtn.textContent = "🚨 Panic Mode";
+          return;
+        }
 
-  const panicGuides = {
-    cyberbullying: `
-1. Save screenshots and evidence.
-2. Block and report the harasser.
-3. Do not engage further.
-4. Inform a trusted person immediately.
-5. Escalate to cybercrime reporting if severe.
-    `,
-    otpScam: `
-1. Stop all communication immediately.
-2. Check bank/UPI account activity.
-3. Change banking passwords and UPI PIN if needed.
-4. Contact your bank urgently.
-5. File a cybercrime complaint as soon as possible.
-    `,
-    accountHacked: `
-1. Change password immediately if access is available.
-2. Log out of all devices.
-3. Enable 2-factor authentication.
-4. Recover the account using official platform recovery.
-5. Inform close contacts not to trust suspicious messages from your account.
-    `,
-    blackmail: `
-1. Do not panic and do not pay.
-2. Save all evidence (messages, usernames, screenshots).
-3. Block and report the person.
-4. Inform a trusted person immediately.
-5. File a cybercrime complaint without delay.
-    `
-  };
-
-  identityShieldBtn.addEventListener("click", () => {
-    identitySection.classList.toggle("hidden");
-    panicSection.classList.add("hidden");
-  });
-
-  panicModeBtn.addEventListener("click", () => {
-    panicSection.classList.toggle("hidden");
-    identitySection.classList.add("hidden");
-  });
-
-  document.querySelectorAll(".issue-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const issue = btn.dataset.issue;
-      identityOutput.textContent = identityGuides[issue] || "No guidance available.";
+        if (response && response.success) {
+          showToast("⚠ Panic Mode Activated • Threat locked");
+          setTimeout(() => {
+            window.close();
+          }, 800);
+        } else {
+          showToast("❌ Panic Mode failed");
+          panicBtn.disabled = false;
+          panicBtn.textContent = "🚨 Panic Mode";
+        }
+      });
     });
-  });
+  }
 
-  document.querySelectorAll(".panic-btn").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const panic = btn.dataset.panic;
-      panicOutput.textContent = panicGuides[panic] || "No guidance available.";
+  if (emergencyBtn) {
+    emergencyBtn.addEventListener("click", () => {
+      showToast("🆘 Emergency Mode ready");
     });
-  });
+  }
+
+  if (resetBtn) {
+    resetBtn.addEventListener("click", () => {
+      chrome.storage.local.clear(() => {
+        showToast("♻ Demo state reset");
+        setTimeout(() => {
+          location.reload();
+        }, 700);
+      });
+    });
+  }
 });
+
+function loadDashboard() {
+  chrome.storage.local.get(
+    [
+      "protectionStatus",
+      "threatsBlocked",
+      "lastRiskScore",
+      "blockedSites",
+      "aiProbability",
+      "aiFeatureVector",
+      "lastPanicEvent"
+    ],
+    (data) => {
+      setText("statusText", data.protectionStatus || "ACTIVE");
+      setText("threatCount", data.threatsBlocked || 0);
+      setText("riskValue", data.lastRiskScore || 0);
+
+      const blockedList = document.getElementById("blockedList");
+      if (blockedList) {
+        blockedList.innerHTML = "";
+
+        const blockedSites = data.blockedSites || [];
+
+        if (!blockedSites.length) {
+          blockedList.innerHTML = `
+            <div style="font-size:12px;color:#94a3b8;">No blocked threats yet</div>
+          `;
+        } else {
+          blockedSites.slice(0, 5).forEach((site) => {
+            const item = document.createElement("div");
+            item.style.background = "rgba(15,23,42,0.75)";
+            item.style.border = "1px solid #334155";
+            item.style.borderRadius = "12px";
+            item.style.padding = "10px";
+            item.style.marginBottom = "8px";
+            item.style.fontSize = "12px";
+            item.style.color = "#e2e8f0";
+
+            item.innerHTML = `
+              <div style="font-weight:700;margin-bottom:4px;">${escapeHtml(site.source || "Threat Blocked")}</div>
+              <div style="color:#94a3b8;word-break:break-word;">${escapeHtml(site.url || "Unknown URL")}</div>
+              <div style="margin-top:4px;color:#fca5a5;">Risk: ${site.score || 0}</div>
+            `;
+
+            blockedList.appendChild(item);
+          });
+        }
+      }
+
+      const panicInfo = document.getElementById("panicInfo");
+      if (panicInfo && data.lastPanicEvent) {
+        panicInfo.innerHTML = `
+          <div style="font-size:12px;color:#fecaca;font-weight:700;">Last Panic Event</div>
+          <div style="font-size:11px;color:#cbd5e1;margin-top:4px;">
+            ${escapeHtml(data.lastPanicEvent.threatType || "Suspicious Session")}
+          </div>
+        `;
+      }
+    }
+  );
+}
+
+function setText(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = value;
+}
+
+function showToast(message) {
+  const existing = document.getElementById("popupToast");
+  if (existing) existing.remove();
+
+  const toast = document.createElement("div");
+  toast.id = "popupToast";
+  toast.style.position = "fixed";
+  toast.style.bottom = "14px";
+  toast.style.left = "14px";
+  toast.style.right = "14px";
+  toast.style.zIndex = "99999";
+  toast.style.background = "linear-gradient(90deg, #111827, #1f2937)";
+  toast.style.color = "white";
+  toast.style.padding = "12px 14px";
+  toast.style.borderRadius = "12px";
+  toast.style.fontSize = "12px";
+  toast.style.fontWeight = "700";
+  toast.style.boxShadow = "0 10px 25px rgba(0,0,0,0.25)";
+  toast.style.border = "1px solid rgba(239,68,68,0.2)";
+  toast.textContent = message;
+
+  document.body.appendChild(toast);
+
+  setTimeout(() => {
+    toast.remove();
+  }, 2200);
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}

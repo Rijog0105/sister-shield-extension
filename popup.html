@@ -3,55 +3,318 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sister Shield</title>
-  <link rel="stylesheet" href="popup.css" />
+  <title>Sister Shield Dashboard</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      width: 380px;
+      min-height: 650px;
+      font-family: Arial, sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(239,68,68,0.10), transparent 30%),
+        radial-gradient(circle at bottom left, rgba(249,115,22,0.08), transparent 30%),
+        linear-gradient(180deg, #020617 0%, #0f172a 100%);
+      color: #f8fafc;
+      padding: 16px;
+    }
+
+    .card {
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(239, 68, 68, 0.15);
+      border-radius: 24px;
+      padding: 18px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+    }
+
+    .top-bar {
+      height: 5px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #ef4444, #f97316, #ef4444);
+      margin-bottom: 16px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .logo {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.18);
+      font-size: 28px;
+    }
+
+    .title {
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .sub {
+      font-size: 12px;
+      color: #cbd5e1;
+      margin-top: 4px;
+    }
+
+    .status {
+      margin-bottom: 14px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: rgba(34,197,94,0.08);
+      border: 1px solid rgba(34,197,94,0.18);
+      color: #bbf7d0;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .mini {
+      background: rgba(2, 6, 23, 0.55);
+      border: 1px solid #334155;
+      border-radius: 18px;
+      padding: 14px;
+    }
+
+    .mini-label {
+      font-size: 11px;
+      color: #94a3b8;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .mini-value {
+      font-size: 24px;
+      font-weight: 800;
+    }
+
+    .risk-card {
+      margin-bottom: 14px;
+      background: rgba(239,68,68,0.08);
+      border: 1px solid rgba(239,68,68,0.16);
+      border-radius: 18px;
+      padding: 14px;
+    }
+
+    .risk-label {
+      font-size: 12px;
+      color: #fecaca;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    .risk-score {
+      font-size: 28px;
+      font-weight: 900;
+      color: #fca5a5;
+      margin-bottom: 10px;
+    }
+
+    .bar {
+      width: 100%;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #ef4444, #f97316);
+      transition: width 0.2s ease;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .feature-card {
+      border-radius: 18px;
+      padding: 14px;
+      border: 1px solid #334155;
+      background: rgba(2, 6, 23, 0.55);
+    }
+
+    .feature-card h3 {
+      margin: 0 0 6px;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .feature-card p {
+      margin: 0 0 12px;
+      font-size: 11px;
+      line-height: 1.5;
+      color: #cbd5e1;
+    }
+
+    .panic-card {
+      border: 1px solid rgba(239,68,68,0.25);
+      background: rgba(239,68,68,0.08);
+    }
+
+    .emergency-card {
+      border: 1px solid rgba(249,115,22,0.25);
+      background: rgba(249,115,22,0.08);
+    }
+
+    .btn {
+      width: 100%;
+      border: none;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      color: white;
+    }
+
+    .btn-panic {
+      background: linear-gradient(90deg, #dc2626, #ef4444);
+    }
+
+    .btn-emergency {
+      background: linear-gradient(90deg, #ea580c, #f97316);
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 800;
+      margin-bottom: 10px;
+      color: #e2e8f0;
+    }
+
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .item {
+      background: rgba(2, 6, 23, 0.55);
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 12px;
+    }
+
+    .item-url {
+      font-size: 12px;
+      font-weight: 700;
+      color: #f8fafc;
+      word-break: break-word;
+      margin-bottom: 6px;
+    }
+
+    .item-meta {
+      font-size: 11px;
+      color: #94a3b8;
+    }
+
+    .empty {
+      font-size: 12px;
+      color: #94a3b8;
+      padding: 10px 0;
+    }
+
+    .alert-box {
+      display: none;
+      margin-bottom: 14px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.5;
+    }
+
+    .alert-show {
+      display: block;
+    }
+
+    .alert-danger {
+      background: rgba(239,68,68,0.10);
+      border: 1px solid rgba(239,68,68,0.20);
+      color: #fecaca;
+    }
+
+    .alert-warning {
+      background: rgba(249,115,22,0.10);
+      border: 1px solid rgba(249,115,22,0.20);
+      color: #fdba74;
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
+  <div class="card">
+    <div class="top-bar"></div>
+
     <div class="header">
-      <h1>Sister Shield</h1>
-      <p>Detect. Intercept. Protect.</p>
-    </div>
-
-    <div class="card">
-      <h2>Protection Status</h2>
-      <p class="small-text">AI-assisted browser protection is active. Use support tools below if needed.</p>
-      <div id="resultBox" class="result-box">
-        <p><strong>Status:</strong> Protection Active</p>
-        <p><strong>Mode:</strong> Automatic AI Protection</p>
+      <div class="logo">🛡️</div>
+      <div>
+        <div class="title">Sister Shield</div>
+        <div class="sub">Women-Centered Cyber Safety Dashboard</div>
       </div>
     </div>
 
-    <div class="card">
-      <h2>Quick Safety Tools</h2>
-      <div class="button-group">
-        <button id="identityShieldBtn" class="secondary-btn">Identity Shield</button>
-        <button id="panicModeBtn" class="secondary-btn">Emergency Panic Mode</button>
+    <div class="status" id="statusBox">Protection Engine: ACTIVE</div>
+
+    <div id="actionAlert" class="alert-box"></div>
+
+    <div class="grid">
+      <div class="mini">
+        <div class="mini-label">Threats Blocked</div>
+        <div class="mini-value" id="threatsBlocked">0</div>
+      </div>
+      <div class="mini">
+        <div class="mini-label">Blocked Sites</div>
+        <div class="mini-value" id="blockedCount">0</div>
       </div>
     </div>
 
-    <div id="identitySection" class="card hidden">
-      <h2>Identity Shield</h2>
-      <p class="small-text">Choose the issue you are facing:</p>
-      <div class="button-group vertical">
-        <button class="issue-btn" data-issue="fakeProfile">Fake Profile Created</button>
-        <button class="issue-btn" data-issue="photoMisuse">My Photos Are Being Misused</button>
-        <button class="issue-btn" data-issue="impersonation">Impersonation / Duplicate Account</button>
-        <button class="issue-btn" data-issue="imageHarassment">Image-Based Harassment / Blackmail</button>
+    <div class="risk-card">
+      <div class="risk-label">Live Risk Score (Current Session)</div>
+      <div class="risk-score" id="riskScore">0</div>
+      <div class="bar">
+        <div class="bar-fill" id="riskBar"></div>
       </div>
-      <div id="identityOutput" class="guide-box"></div>
     </div>
 
-    <div id="panicSection" class="card hidden">
-      <h2>Emergency Panic Mode</h2>
-      <p class="small-text">Choose the emergency situation:</p>
-      <div class="button-group vertical">
-        <button class="panic-btn" data-panic="cyberbullying">Cyberbullying / Harassment</button>
-        <button class="panic-btn" data-panic="otpScam">OTP / Money Scam</button>
-        <button class="panic-btn" data-panic="accountHacked">Account Hacked</button>
-        <button class="panic-btn" data-panic="blackmail">Blackmail / Threats</button>
+    <div class="feature-grid">
+      <div class="feature-card panic-card">
+        <h3>🚨 Panic Mode</h3>
+        <p>Instantly trigger a safety response and move the user away from risky browsing flow.</p>
+        <button class="btn btn-panic" id="panicBtn">Activate Panic Mode</button>
       </div>
-      <div id="panicOutput" class="guide-box"></div>
+
+      <div class="feature-card emergency-card">
+        <h3>🆘 Emergency Mode</h3>
+        <p>Show immediate emergency actions like cybercrime reporting and trusted contact guidance.</p>
+        <button class="btn btn-emergency" id="emergencyBtn">Open Emergency Mode</button>
+      </div>
+    </div>
+
+    <div class="section-title">Recently Blocked Sites</div>
+    <div class="list" id="blockedList">
+      <div class="empty">No threats blocked yet.</div>
     </div>
   </div>
 
