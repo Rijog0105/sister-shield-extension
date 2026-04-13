@@ -1,8 +1,28 @@
+// Sister Shield — background.js
+// AI integration by DVK via Chrome Cyber Safe proxy
+// Proxy: https://chrome-cyber-safe.vercel.app/api/analyze
+
+const PROXY_URL = "https://chrome-cyber-safe.vercel.app/api/analyze";
+
+// =============================================
+// MESSAGE LISTENER
+// =============================================
+
 chrome.runtime.onInstalled.addListener(() => {
-  console.log("SHELTER background service worker active");
+  console.log("Sister Shield background service worker active");
 });
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+
+  if (message.action === "analyzeWithAI") {
+    analyzeWithGemini(message.text).then((result) => {
+      sendResponse({ success: true, data: result });
+    }).catch((err) => {
+      sendResponse({ success: false, error: err.message });
+    });
+    return true; // Keep message channel open for async
+  }
+
   if (message.action === "panicMode") {
     handlePanicMode(sendResponse);
     return true;
@@ -13,6 +33,57 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
 });
+
+// =============================================
+// GEMINI AI — via Chrome Cyber Safe proxy
+// No API key in extension code. Key lives on Vercel server only.
+// =============================================
+
+async function analyzeWithGemini(text) {
+  try {
+    const response = await fetch(PROXY_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Proxy returned status ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    // Store the AI result in chrome.storage so popup can read it
+    chrome.storage.local.set({
+      lastAIVerdict: {
+        threatLevel: data.threatLevel || "Unknown",
+        score: data.score || 0,
+        scamType: data.scamType || "Unknown",
+        reasons: data.reasons || [],
+        advice: data.advice || "",
+        timestamp: new Date().toLocaleTimeString()
+      }
+    });
+
+    return data;
+
+  } catch (error) {
+    console.error("Sister Shield AI error:", error);
+
+    // Return a safe fallback so the extension doesn't crash
+    return {
+      threatLevel: "Suspicious",
+      score: 50,
+      scamType: "Unknown",
+      reasons: ["AI analysis unavailable — treat with caution"],
+      advice: "Could not connect to AI. Be cautious with this content."
+    };
+  }
+}
+
+// =============================================
+// PANIC MODE
+// =============================================
 
 function handlePanicMode(sendResponse) {
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -38,7 +109,6 @@ function handlePanicMode(sendResponse) {
       const threatsBlocked = data.threatsBlocked || 0;
 
       panicLogs.unshift(threatLog);
-
       blockedSites.unshift({
         url: threatLog.url,
         score: 100,
@@ -58,23 +128,20 @@ function handlePanicMode(sendResponse) {
         () => {
           chrome.tabs.remove(activeTab.id, () => {
             if (chrome.runtime.lastError) {
-              sendResponse({
-                success: false,
-                error: chrome.runtime.lastError.message
-              });
+              sendResponse({ success: false, error: chrome.runtime.lastError.message });
               return;
             }
-
-            sendResponse({
-              success: true,
-              message: "Panic Mode activated"
-            });
+            sendResponse({ success: true, message: "Panic Mode activated" });
           });
         }
       );
     });
   });
 }
+
+// =============================================
+// EMERGENCY MODE
+// =============================================
 
 function handleEmergencyMode(sendResponse) {
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -90,7 +157,6 @@ function handleEmergencyMode(sendResponse) {
 
     chrome.storage.local.get(["emergencyLogs"], (data) => {
       const emergencyLogs = data.emergencyLogs || [];
-
       emergencyLogs.unshift(emergencyLog);
 
       chrome.storage.local.set(
@@ -100,43 +166,26 @@ function handleEmergencyMode(sendResponse) {
           protectionStatus: "EMERGENCY MODE ACTIVATED"
         },
         () => {
-          chrome.tabs.create(
-            {
-              url: "https://cybercrime.gov.in/"
-            },
-            () => {
-              sendResponse({
-                success: true,
-                message: "Emergency Mode activated"
-              });
-            }
-          );
+          chrome.tabs.create({ url: "https://cybercrime.gov.in/" }, () => {
+            sendResponse({ success: true, message: "Emergency Mode activated" });
+          });
         }
       );
     });
   });
 }
 
+// =============================================
+// HELPER — Detect threat type from tab info
+// =============================================
+
 function detectThreatType(tab) {
   const url = (tab.url || "").toLowerCase();
   const title = (tab.title || "").toLowerCase();
 
-  if (url.includes("bank") || title.includes("bank")) {
-    return "Banking Phishing";
-  }
-
-  if (url.includes("mail") || title.includes("gmail") || title.includes("internship")) {
-    return "Email Scam / Phishing";
-  }
-
-  if (
-    url.includes("instagram") ||
-    title.includes("instagram") ||
-    title.includes("fake account") ||
-    title.includes("photo misuse")
-  ) {
-    return "Social Media Impersonation / Photo Misuse";
-  }
+  if (url.includes("bank") || title.includes("bank")) return "Banking Phishing";
+  if (url.includes("mail") || title.includes("gmail") || title.includes("internship")) return "Email Scam / Phishing";
+  if (url.includes("instagram") || title.includes("instagram") || title.includes("photo misuse")) return "Social Media Impersonation";
 
   return "Suspicious Session";
 }

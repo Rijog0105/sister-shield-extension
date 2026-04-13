@@ -1,21 +1,25 @@
 {
   "manifest_version": 3,
   "name": "Sister Shield",
-  "version": "1.0",
-  "description": "AI-powered browser safety extension",
-  "permissions": ["storage", "tabs", "activeTab"],
-  "host_permissions": ["<all_urls>"],
+  "version": "1.0.0",
+  "description": "AI-assisted autonomous browser safety extension that detects suspicious links, phishing-like pages, and risky downloads in real time.",
+  "permissions": ["activeTab", "scripting", "storage", "tabs"],
+  "host_permissions": [
+    "<all_urls>",
+    "https://chrome-cyber-safe.vercel.app/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Sister Shield"
+  },
   "background": {
     "service_worker": "background.js"
-  },
-  "action": {
-    "default_popup": "popup.html"
   },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["libs/tf-lit.js", "content.js"],
+      "js": ["utils.js", "content.js"],
       "run_at": "document_idle"
     }
-  ] 
+  ]
 }

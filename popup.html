@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="UTF-8" />
-  <title>SHELTER</title>
+  <title>Sister Shield</title>
   <style>
     body {
       margin: 0;
@@ -95,11 +95,65 @@
       font-size: 12px;
       color: #94a3b8;
     }
+
+    /* AI Verdict styles */
+    .ai-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .ai-badge.high {
+      background: rgba(239,68,68,0.18);
+      border: 1px solid rgba(239,68,68,0.3);
+      color: #fca5a5;
+    }
+
+    .ai-badge.suspicious {
+      background: rgba(245,158,11,0.18);
+      border: 1px solid rgba(245,158,11,0.3);
+      color: #fcd34d;
+    }
+
+    .ai-badge.safe {
+      background: rgba(34,197,94,0.18);
+      border: 1px solid rgba(34,197,94,0.3);
+      color: #86efac;
+    }
+
+    .ai-reason {
+      font-size: 11px;
+      color: #cbd5e1;
+      line-height: 1.6;
+      margin-top: 4px;
+    }
+
+    .ai-advice {
+      margin-top: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      color: #fdba74;
+      background: rgba(249,115,22,0.08);
+      border: 1px solid rgba(249,115,22,0.2);
+      border-radius: 10px;
+      padding: 8px 10px;
+    }
+
+    .ai-loading {
+      font-size: 12px;
+      color: #94a3b8;
+      font-style: italic;
+    }
   </style>
 </head>
 <body>
+
+  <!-- Status Dashboard -->
   <div class="card">
-    <div class="title">🛡️ SISTER SHIELD </div>
+    <div class="title">🛡️ Sister Shield</div>
     <div class="subtitle">Real-Time Browser Safety Extension</div>
 
     <div class="grid">
@@ -120,12 +174,25 @@
     </div>
   </div>
 
+  <!-- AI Verdict Card — powered by Chrome Cyber Safe proxy -->
+  <div class="card">
+    <div style="font-size:14px;font-weight:800;margin-bottom:10px;">
+      🧠 AI Verdict
+      <span style="font-size:10px;font-weight:500;color:#64748b;margin-left:6px;">via Chrome Cyber Safe</span>
+    </div>
+    <div id="aiVerdictBox">
+      <div class="ai-loading">No AI analysis yet. Trigger a threat to see Gemini verdict.</div>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
   <div class="card">
     <button class="btn panic" id="panicBtn">🚨 Panic Mode</button>
     <button class="btn emergency" id="emergencyBtn">🆘 Emergency Mode</button>
     <button class="btn reset" id="resetBtn">♻ Reset Demo State</button>
   </div>
 
+  <!-- Blocked Threats -->
   <div class="card">
     <div style="font-size:14px;font-weight:800;margin-bottom:10px;">Blocked Threats</div>
     <div id="blockedList">
@@ -133,6 +200,7 @@
     </div>
   </div>
 
+  <!-- Emergency Activity -->
   <div class="card">
     <div style="font-size:14px;font-weight:800;margin-bottom:10px;">Emergency Activity</div>
     <div id="panicInfo">

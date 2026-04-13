@@ -2,11 +2,10 @@ let currentDisplayedRisk = 0;
 let riskAnimationInterval = null;
 
 document.addEventListener("DOMContentLoaded", () => {
-  console.log("SHELTER popup loaded");
+  console.log("Sister Shield popup loaded");
 
   loadDashboard();
 
-  // Live listen for storage changes
   chrome.storage.onChanged.addListener(handleStorageChanges);
 
   const panicBtn = document.getElementById("panicBtn");
@@ -20,7 +19,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       chrome.runtime.sendMessage({ action: "panicMode" }, (response) => {
         if (chrome.runtime.lastError) {
-          console.error("Panic Mode error:", chrome.runtime.lastError);
           showToast("❌ Panic Mode failed");
           panicBtn.disabled = false;
           panicBtn.textContent = "🚨 Panic Mode";
@@ -46,7 +44,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       chrome.runtime.sendMessage({ action: "emergencyMode" }, (response) => {
         if (chrome.runtime.lastError) {
-          console.error("Emergency Mode error:", chrome.runtime.lastError);
           showToast("❌ Emergency Mode failed");
           emergencyBtn.disabled = false;
           emergencyBtn.textContent = "🆘 Emergency Mode";
@@ -77,6 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
         setText("threatCount", "0");
         renderBlockedList([]);
         renderPanicInfo(null, null);
+        renderAIVerdict(null);
         showToast("♻ Demo state reset");
       });
     });
@@ -96,11 +94,10 @@ function loadDashboard() {
       "lastRiskScore",
       "blockedSites",
       "lastPanicEvent",
-      "lastEmergencyEvent"
+      "lastEmergencyEvent",
+      "lastAIVerdict"
     ],
     (data) => {
-      console.log("SHELTER popup storage data:", data);
-
       setText("statusText", data.protectionStatus || "ACTIVE");
       setText("threatCount", String(data.threatsBlocked || 0));
 
@@ -109,14 +106,13 @@ function loadDashboard() {
 
       renderBlockedList(data.blockedSites || []);
       renderPanicInfo(data.lastPanicEvent || null, data.lastEmergencyEvent || null);
+      renderAIVerdict(data.lastAIVerdict || null);
     }
   );
 }
 
 function handleStorageChanges(changes, areaName) {
   if (areaName !== "local") return;
-
-  console.log("SHELTER storage changed:", changes);
 
   if (changes.protectionStatus) {
     setText("statusText", changes.protectionStatus.newValue || "ACTIVE");
@@ -127,86 +123,93 @@ function handleStorageChanges(changes, areaName) {
   }
 
   if (changes.lastRiskScore) {
-    const target = Number(changes.lastRiskScore.newValue || 0);
-    animatePopupRisk(target);
+    animatePopupRisk(Number(changes.lastRiskScore.newValue || 0));
   }
 
   if (changes.blockedSites) {
     renderBlockedList(changes.blockedSites.newValue || []);
   }
 
-  const panicEvent = changes.lastPanicEvent ? changes.lastPanicEvent.newValue : undefined;
-  const emergencyEvent = changes.lastEmergencyEvent ? changes.lastEmergencyEvent.newValue : undefined;
+  if (changes.lastAIVerdict) {
+    renderAIVerdict(changes.lastAIVerdict.newValue || null);
+  }
 
   if (changes.lastPanicEvent || changes.lastEmergencyEvent) {
     chrome.storage.local.get(["lastPanicEvent", "lastEmergencyEvent"], (data) => {
-      renderPanicInfo(
-        panicEvent !== undefined ? panicEvent : (data.lastPanicEvent || null),
-        emergencyEvent !== undefined ? emergencyEvent : (data.lastEmergencyEvent || null)
-      );
+      renderPanicInfo(data.lastPanicEvent || null, data.lastEmergencyEvent || null);
     });
   }
 }
 
-function animatePopupRisk(target) {
-  const riskEl = document.getElementById("riskValue");
-  if (!riskEl) {
-    console.error("riskValue element not found");
+// =============================================
+// AI VERDICT RENDERER
+// Powered by Chrome Cyber Safe proxy (DVK)
+// =============================================
+
+function renderAIVerdict(verdict) {
+  const box = document.getElementById("aiVerdictBox");
+  if (!box) return;
+
+  if (!verdict) {
+    box.innerHTML = `<div class="ai-loading">No AI analysis yet. Trigger a threat to see Gemini verdict.</div>`;
     return;
   }
 
-  // Reset properly if cleared
+  const level = verdict.threatLevel || "Unknown";
+  const badgeClass = level === "High Risk" ? "high" : level === "Suspicious" ? "suspicious" : "safe";
+
+  const reasonsHtml = (verdict.reasons || [])
+    .slice(0, 3)
+    .map(r => `<div class="ai-reason">• ${escapeHtml(r)}</div>`)
+    .join("");
+
+  box.innerHTML = `
+    <div class="ai-badge ${badgeClass}">${escapeHtml(level)} — ${verdict.score}/100</div>
+    <div style="font-size:11px;color:#94a3b8;margin-bottom:6px;">
+      Type: ${escapeHtml(verdict.scamType || "Unknown")}
+      ${verdict.timestamp ? `• ${escapeHtml(verdict.timestamp)}` : ""}
+    </div>
+    ${reasonsHtml}
+    ${verdict.advice ? `<div class="ai-advice">💡 ${escapeHtml(verdict.advice)}</div>` : ""}
+  `;
+}
+
+function animatePopupRisk(target) {
+  const riskEl = document.getElementById("riskValue");
+  if (!riskEl) return;
+
   if (target === 0) {
-    if (riskAnimationInterval) {
-      clearInterval(riskAnimationInterval);
-      riskAnimationInterval = null;
-    }
+    if (riskAnimationInterval) { clearInterval(riskAnimationInterval); riskAnimationInterval = null; }
     currentDisplayedRisk = 0;
     updateRiskUI(0);
     return;
   }
 
-  // If already same
-  if (target === currentDisplayedRisk) {
-    updateRiskUI(currentDisplayedRisk);
-    return;
-  }
+  if (target === currentDisplayedRisk) { updateRiskUI(currentDisplayedRisk); return; }
 
-  // If target smaller, snap down
   if (target < currentDisplayedRisk) {
-    if (riskAnimationInterval) {
-      clearInterval(riskAnimationInterval);
-      riskAnimationInterval = null;
-    }
+    if (riskAnimationInterval) { clearInterval(riskAnimationInterval); riskAnimationInterval = null; }
     currentDisplayedRisk = target;
     updateRiskUI(currentDisplayedRisk);
     return;
   }
 
-  // Stop old animation
-  if (riskAnimationInterval) {
-    clearInterval(riskAnimationInterval);
-    riskAnimationInterval = null;
-  }
+  if (riskAnimationInterval) { clearInterval(riskAnimationInterval); riskAnimationInterval = null; }
 
   riskAnimationInterval = setInterval(() => {
     currentDisplayedRisk += Math.ceil((target - currentDisplayedRisk) / 5);
-
     if (currentDisplayedRisk >= target) {
       currentDisplayedRisk = target;
       clearInterval(riskAnimationInterval);
       riskAnimationInterval = null;
     }
-
     updateRiskUI(currentDisplayedRisk);
   }, 80);
 }
 
 function updateRiskUI(value) {
   const riskEl = document.getElementById("riskValue");
-  if (riskEl) {
-    riskEl.textContent = String(value);
-  }
+  if (riskEl) riskEl.textContent = String(value);
 }
 
 function renderBlockedList(blockedSites) {
@@ -269,11 +272,7 @@ function renderPanicInfo(lastPanicEvent, lastEmergencyEvent) {
 
 function setText(id, value) {
   const el = document.getElementById(id);
-  if (el) {
-    el.textContent = String(value);
-  } else {
-    console.error(`Element with id "${id}" not found`);
-  }
+  if (el) el.textContent = String(value);
 }
 
 function showToast(message) {
@@ -298,10 +297,7 @@ function showToast(message) {
   toast.textContent = message;
 
   document.body.appendChild(toast);
-
-  setTimeout(() => {
-    toast.remove();
-  }, 2200);
+  setTimeout(() => toast.remove(), 2200);
 }
 
 function escapeHtml(str) {
